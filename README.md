@@ -35,4 +35,4 @@ http://yourdomain/images/v1/resize?width=500&height=200&path=flower.jpg
 - To install GraphicsMagick 1.3.2.1 on Windows please see link below 
   * http://www.graphicsmagick.org/INSTALL-windows.html
   * http://78.108.103.11/MIRROR/ftp/GraphicsMagick/1.3/windows/
-- Note that GraphicsMagick 1.3.2.1 is only supported. 
+- Note that currently GraphicsMagick 1.3.2.1 is only supported.
