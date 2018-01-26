@@ -1,14 +1,14 @@
 # ON DEMAND IMAGE MANIPULATION APP [![Build Status](https://travis-ci.org/younggyuchun/on-demand-image-manipulation-webapp.svg?branch=master)](https://travis-ci.org/younggyuchun/on-demand-image-manipulation-webapp)
 Many web or mobile app provides feature that display images. The images might be users uploaded images, product images, or static images. You probably need to manipulate the images on-the-fly to fit user requirements or mobile devices.  
 
-ON-DEMAND Image Manipulate App allows you to specify the required height and width to resize or crop images and also optimizes images to reduce file size and save bandwidth.
+ON-DEMAND Image Manipulate App allows you to specify the required height and width to resize or crop images and also optimizes images to reduce file size and save bandwidth. 
 
 The following URL example shows image resizes transformation.
 ```
 http://yourdomain/images/v1/resize?width=500&height=200&path=flower.jpg
 ```
 
-### Supported Image processing application
+### Supported image processing application
 - [GraphicsMagick](http://www.graphicsmagick.org/) (currently supported)
 - [ImageMagick](http://imagemagick.org/script/index.php) (coming soon)
 
