@@ -1,12 +1,9 @@
 package image.engine.graphicsmagick;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
 import org.gm4java.engine.GMConnection;
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMServiceException;
@@ -16,6 +13,7 @@ import org.gm4java.engine.support.PooledGMService;
 import image.domain.Image;
 import image.engine.ImageProcessing;
 import image.exception.ResizeException;
+import image.response.Response;
 
 
 /**This implementation uses gm4java. It encapsulates the complexity of GraphicsMagick.
@@ -29,16 +27,16 @@ public class GraphicsMagick implements ImageProcessing{
 	
 	private PooledGMService gmService;
 	private int gmProcess;
-	private String imgTempDir;
+	
+	
+	Response response = new Response();
 	
 	/**
 	 * @param process
 	 * @param tempDir
 	 */
-	public GraphicsMagick(int process, String tempDir){
+	public GraphicsMagick(int process){
 		this.gmProcess = process;
-		this.imgTempDir = tempDir;
-		
 		GMConnectionPoolConfig config = new GMConnectionPoolConfig();	
 		config.setMaxActive(gmProcess);
 		
@@ -48,33 +46,19 @@ public class GraphicsMagick implements ImageProcessing{
 	}
 	
 
+	
+
 	/* (non-Javadoc)
 	 * @see image.engine.ImageProcessing#resize(java.io.File, image.domain.Image, javax.servlet.http.HttpServletResponse)
 	 */
-	public void resize(File file, Image image, HttpServletResponse response){
+	public void resize(Image image, HttpServletResponse httpServletResponse){
 		GMConnection connection = null;
 		try{
 			connection = gmService.getConnection();
-			
-			StringBuilder targetFileName = new StringBuilder();
-			targetFileName.append(imgTempDir)
-			.append(File.separator)			
-			.append(file.getName())
-			.append("_")
-			.append(System.currentTimeMillis())
-			.append("_")
-			.append(image.getRandomNum());
-			
-			//String targetFileName = imgTempDir + File.pathSeparator + imgDir + file.getName() + "_" + System.currentTimeMillis() + "_" + image.getRandomNum();
-			resize(connection, file, image, targetFileName.toString());
-			OutputStream toClient = response.getOutputStream();
-			toClient.write(FileUtils.readFileToByteArray(new File(targetFileName.toString())));
-			toClient.close();
-			
-			File targetFile = new File(targetFileName.toString());
-			targetFile.delete();
+			resize(connection, image);
+			response.writeOutputStream(image.getTempImageName(), httpServletResponse);
 		}catch(Exception e) {
-			throw new ResizeException(e.getMessage());
+			throw new ResizeException("Resize Exception: " + e.getMessage());
 		}finally{
 			try {
 				connection.close();
@@ -93,18 +77,42 @@ public class GraphicsMagick implements ImageProcessing{
 	 * @throws GMException
 	 * @throws GMServiceException
 	 */
-	private void resize(GMConnection connection, File file, Image image, String targetFileName) throws IOException, GMException, GMServiceException{
+	private void resize(GMConnection connection, Image image) throws IOException, GMException, GMServiceException{
 		connection.execute(
 				"convert",
-				file.getAbsolutePath(),
+				image.getFile().getAbsolutePath(),
 				"-size", String.valueOf(image.getWidth())+"x"+String.valueOf(image.getHeight())+">",
-				file.getAbsolutePath(),
+				image.getFile().getAbsolutePath(),
 				"-resize", String.valueOf(image.getWidth())+"x"+String.valueOf(image.getHeight())+">",
 				"+profile", "*",
 				"-interlace", "Line",
 				"-colorspace", "RGB",
 				"-quality", "85",
-				targetFileName);	
+				image.getTempImageName());	
+	}
+	
+	/**
+	 * @param connection
+	 * @param file
+	 * @param image
+	 * @param targetFileName
+	 * @throws IOException
+	 * @throws GMException
+	 * @throws GMServiceException
+	 */
+	private void crop(GMConnection connection, Image image) throws IOException, GMException, GMServiceException{
+		connection.execute(
+				"convert",
+				"-size", String.valueOf(image.getWidth())+"x"+String.valueOf(image.getHeight())+"^",
+				image.getFile().getAbsolutePath(),
+			    "-resize", String.valueOf(image.getWidth())+"x"+String.valueOf(image.getHeight())+"^",
+			    "+profile", "*",
+			    "-interlace", "Line",
+			    "-colorspace", "RGB",
+			    "-quality", "85",
+			    "-gravity", image.getGravity(),
+			    "-crop", String.valueOf(image.getWidth())+"x"+String.valueOf(image.getHeight())+"+0+0",
+			    image.getTempImageName());		
 	}
 
 
@@ -112,8 +120,20 @@ public class GraphicsMagick implements ImageProcessing{
 	/* (non-Javadoc)
 	 * @see image.engine.ImageProcessing#crop(java.io.File, image.domain.Image, javax.servlet.http.HttpServletResponse)
 	 */
-	public void crop(File file, Image image, HttpServletResponse response) {
-		
-	}	
-
+	public void crop(Image image, HttpServletResponse httpServletResponse){
+		GMConnection connection = null;
+		try{
+			connection = gmService.getConnection();
+			crop(gmService.getConnection(), image);
+			response.writeOutputStream(image.getTempImageName(), httpServletResponse);
+		}catch(Exception e) {
+			throw new ResizeException("Resize Exception: " + e.getMessage());
+		}finally{
+			try {
+				connection.close();
+			} catch (GMServiceException e) {
+				throw new ResizeException(e.getMessage());
+			}
+		}
+	}
 }

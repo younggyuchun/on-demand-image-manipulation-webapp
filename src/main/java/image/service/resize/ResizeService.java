@@ -47,17 +47,27 @@ public class ResizeService {
 	private static ImageProcessing imageProcessing;	
 
 	
-	public void resize(Image image, 
+	public void imageProcess(Image image, 
 			HttpServletRequest request, 
 			HttpServletResponse response) {
 		
-		imageProcessing = new GraphicsMagick(Integer.valueOf(process), tempDir);
+		imageProcessing = new GraphicsMagick(Integer.valueOf(process));
 		
 		File file = new File(imgDir.concat(File.separator).concat(image.getPath()));
 		
 		if(file.exists()) {
-			image = reader.readImageMeta(file, image);
-			imageProcessing.resize(file, image, response);
+			image.setFile(file);
+			image.setTempDir(tempDir);
+			image.setTargetName(image.getFile().getName());
+			image.setTempImageName();
+			image = reader.readImageMeta(image);
+			
+			if("resize".equals(image.getOperation())) {
+				imageProcessing.resize(image, response);
+			}else if("crop".equals(image.getOperation())) {
+				imageProcessing.crop(image, response);
+			}
+			
 		}else {
 			logger.info("file does not exist");
 			response.setStatus(404);

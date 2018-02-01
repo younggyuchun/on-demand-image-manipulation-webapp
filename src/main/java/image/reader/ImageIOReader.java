@@ -1,7 +1,6 @@
 package image.reader;
 
 import java.awt.color.ColorSpace;
-import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -25,12 +24,12 @@ import image.exception.ImageReaderException;
 @Service
 public class ImageIOReader {
 	
-	public Image readImageMeta(File file, Image image){
+	public Image readImageMeta(Image image){
 		ImageInputStream iis = null;
 		ImageReader reader = null;
 		
         try{
-			iis = ImageIO.createImageInputStream(file);
+			iis = ImageIO.createImageInputStream(image.getFile());
 			Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);    		
 			//imageInfo.put("colorSpace", "RGB");
 			reader = getImageReader(readers);
@@ -39,10 +38,11 @@ public class ImageIOReader {
 			image.setOriginalWidth(reader.getWidth(reader.getMinIndex()));
 			image.setOriginalHeight(reader.getHeight(reader.getMinIndex()));
 			image.setOriginalFormat(reader.getFormatName());
-			image.setOriginalColorSpace(getColorSpace(reader));			
+			image.setOriginalColorSpace(getColorSpace(reader));	
+			
 			
 			if("jpeg".equals(image.getOriginalColorSpace())) {
-				int quality = (int)((JPEGQuality.getJPEGQuality(ImageIO.createImageInputStream(file)) * 100) - 4);
+				int quality = (int)((JPEGQuality.getJPEGQuality(ImageIO.createImageInputStream(image.getFile())) * 100) - 4);
 				image.setOriginalQuality(quality);
 			}
         }catch(IOException e){

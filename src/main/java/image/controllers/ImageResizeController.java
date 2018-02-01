@@ -28,13 +28,13 @@ public class ImageResizeController {
 	@Autowired
 	ResizeService resizeService;
 	
-	@RequestMapping(value = "/images/v1/resize", method = RequestMethod.GET)
+	@RequestMapping(value = "/images/v1/{operation}", method = RequestMethod.GET)
 	public void resize(Image image, 
 			HttpServletRequest request, 
 			HttpServletResponse response){
 		
 		logger.info("width:{} height:{} qulity:{}, operation:RESIZE", image.getWidth(), image.getHeight(), image.getQuality());
-		resizeService.resize(image, request, response);
+		resizeService.imageProcess(image, request, response);
 		
 	}		
 }
