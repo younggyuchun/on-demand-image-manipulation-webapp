@@ -17,15 +17,15 @@ http://yourdomain/images/v1/resize?width=500&height=200&path=flower.jpg
 - http://www.graphicsmagick.org/formats.html
 
 ### Features (currently)
-- resize a image including animated GIFs
-- optimize a image quality
+- resize an image including animated GIFs
+- optimize aan image quality
 
 ### Features (coming soon)
-- fetch a image from remote locations
-- composite a image
-- convert a image format
-- a image padding
-- a image transformation(rotate, crop, flip)
+- fetch an image from remote locations
+- composite an image
+- convert an image format
+- an image padding
+- an image transformation(rotate, crop, flip)
 
 ### Image processing installation
 - To use this on-demand a image manipulate app, GraphicsMagick 1.3.2.1 must be installed on Linux or Windows.
